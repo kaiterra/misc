@@ -1,4 +1,4 @@
-# kubeadm on Aliyun
+# Kubernetes in China (Aliyun)
 
 Thanks to Aliyun mirrors, in spring/summer 2018 this got a lot easier.
 
