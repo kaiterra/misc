@@ -196,7 +196,7 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
 And now you should be able to run `kubectl cluster-info`.
 
-Finally, to allow master nodes to run workloads, use:
+Finally, if you wish to permit master nodes to run workloads (this is a security vs. resource consumption tradeoff), use:
 
 ```bash
 kubectl taint nodes --all node-role.kubernetes.io/master-
@@ -273,15 +273,12 @@ After a while, `kubectl get node` should show two nodes in the `Ready` state.
 
 There are two gaping holes in this guide:
 
-- This is a single-master Kubernetes cluster. That's not _terrible_... a master going down just means that new workloads can't be scheduled, not that existing ones break. This might be the right tradeoff for you. However, if you lose the master's disk, etcd configuration goes with it, and the cluster must be rebuilt from scratch.
-- There are no instructions on upgrading any of the components. This is something that kops does extremely well. Doing it manually on a cluster of modest size shouldn't be terrible -- drain a node, upgrade its components, re-add it to the cluster -- but there's a lot of potential for things to go wrong.
-
-
+- This is a single-master Kubernetes cluster. That's not _terrible_... a master going down just means that new workloads can't be scheduled, not that existing ones break. This might be the right tradeoff for you. However, if you lose the master's disk, etcd configuration goes with it, and the cluster must be rebuilt from scratch. It must be periodically backed up.
+- Upgrading isn't addressed at all. This is something that kops does extremely well. Doing it manually on a cluster of modest size shouldn't be terrible -- drain a node, upgrade its components, re-add it to the cluster -- but there's a lot of potential for things to go wrong.
 
 
 
 ## 11. Odds and Ends
-
 
 
 ### Local Storage and Load Balancers
