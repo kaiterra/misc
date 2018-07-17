@@ -5,17 +5,21 @@ Thanks to Aliyun mirrors, in spring/summer 2018 this got a lot easier.
 This guide uses kubeadm to set up a Kubernetes cluster on Aliyun. Details:
 
 - Ubuntu 16.04
-- Single master (non-HA)
+- Single master (non-HA). Should be straightforward to adapt to HA though.
 - Integration with VPC networking
-- No storage or load balancer integration
 
+Not covered:
+
+- Backup and Upgrading (maybe coming soon?)
+- Tool-assisted machine provisioning (you'll need to do it manually)
+- Aliyun storage or load balancer integration. It's unclear how difficult this is to set up. Instead, [local persistent volumes](https://kubernetes.io/blog/2018/04/13/local-persistent-volumes-beta/), which are in beta in k8s 1.10, seem like a viable alternative.
 
 
 ## 1. Set up your machines
 
 Make sure they're all in the same VPC (专有网络).  The CIDR address block used for the VPC's network (目标网段; should be 172.17.0.0/16 or so) doesn't seem to be important.
 
-This guide is for Ubuntu 16.04, but any [supported](https://success.docker.com/article/compatibility-matrix) Docker OS should work. CoreOS is apparently the new hotness when it comes to hosting containerized workloads, but we haven't investigated it yet.
+This guide is for Ubuntu 16.04, but any [supported](https://success.docker.com/article/compatibility-matrix) Docker OS should work, though CoreOS is apparently the new hotness when it comes to hosting containerized workloads.
 
 
 
@@ -71,7 +75,7 @@ You'll need to manually install kubelet (the main Kubernetes runtime component t
 Constraints on version choices include:
 
 - kubelet can be at most 1 minor version behind the version of kubeadm you're using. So if you're using kubeadm v1.11.2, you can use kubelet >= v1.10.0, but not v1.9.6 for example.
-- The Aliyun `google-containers` mirror may not have every single Kubernetes version. Mirrored versions are listed [here](https://dev.aliyun.com/detail.html?spm=5176.1972343.2.28.ItEn5B&repoId=91673). Note that there are `google-containers` images and `google_containers` images (with an underscore); use the underscore one.
+- The Aliyun `google-containers` mirror may not have every single Kubernetes version. Mirrored versions are listed [here](https://dev.aliyun.com/detail.html?spm=5176.1972343.2.28.ItEn5B&repoId=91673). Note that there are `google-containers` images and `google_containers` images (with an underscore). Use the underscore one. (They're both provided by Alibaba, but the underscore one has many more versions, because... reasons?)
 - Consider choosing one or two versions behind the latest, so you can practice upgrading before deploying a production workload.
 
 
@@ -120,7 +124,7 @@ Here's what's going on here:
 
 **Warning:** --allow-privileged will be removed in Kubernetes v1.12. There's a replacement, but I couldn't figure out what it was after 5 minutes of googling.
 
-Then, do `systemctl daemon-reload && systemctl restart kubelet`. It'll get stuck in a restart crash loop, but that's fine.
+Then, do `systemctl daemon-reload && systemctl restart kubelet`. It'll get stuck in a restart crash loop, but that's by design -- it'll start working properly once `kubeadm init` generates kubelet's configuration.
 
 > Given [this Github issue](https://github.com/kubernetes/kubeadm/issues/28), it seems like such manual configuration of kubelet shouldn't be necessary anymore, but perhaps that issue is referring to something else.
 
@@ -157,11 +161,11 @@ kubeadm config print-default > kubeadm.conf
 # Use the gcr.io mirror
 sed -i "s/imageRepository: .*/imageRepository: registry.cn-hangzhou.aliyuncs.com\/google_containers/g" kubeadm.conf
 
-# And then since you're using kubeadm.conf, you can't use command-line
-# switches for anything else, so throw those in kubeadm.conf too.
+# And then since you're using kubeadm.conf, you can't mix that with command-line
+# switches, so we throw the other setting changes into kubeadm.conf too.
 #
 # podSubnet is necessary to play nice with the kube-flannel-aliyun.yaml config
-# from the networking setup below
+# from the networking setup below.  This must match.
 sed -i "s/  podSubnet: .*/  podSubnet: \"10.24.0.0\/16\"/g" kubeadm.conf
 
 # This is your chosen Kubernetes version
@@ -226,13 +230,13 @@ In general, if things don't seem to be working, use `kubectl get pod --all-names
 
 [This pioneering post](https://www.alibabacloud.com/forum/read-830) seems to have everything we need, but the key part -- the flannel yaml file -- is now returning HTTP 403. Kinda makes you feel like [this](https://xkcd.com/979/).
 
-Luckily, the flannel team already did this for us. First, download the [kube-flannel-aliyun.yaml](https://github.com/coreos/flannel/blob/v0.10.0/Documentation/kube-flannel.yml) file from the version of flannel you want to run, which is probably the latest one. Note that as of 2017-07-12 it's using flannel v0.9.0, because there's no later image available on the Aliyun mirror.
+Luckily, the flannel team already did this for us. First, download the [kube-flannel-aliyun.yaml](https://github.com/coreos/flannel/blob/v0.10.0/Documentation/kube-flannel.yml) file from the version of flannel you want to run, which is probably the latest one. Note that as of 2017-07-12 it's using flannel v0.9.0, because there's no later image available on the Aliyun mirror (the quay.io image mostly works, but in one test I did it took about 10 minutes to pull).
 
-> The quay.io image mostly works, but in one test I did, it took about 10 minutes to pull.
+**Important:** In `kube-flannel-aliyun.yaml`, verify that net-conf.json's Network setting matches what you specified in kubeadm.conf for podSubnet.
 
-Next, follow parts of [this document](https://coreos.com/flannel/docs/latest/alicloud-vpc-backend.html), which curiously enough talks about how to run flannel without talking at all about kubernetes. The key parts are that you need to create user accounts that flannel can use, and then flannel needs those Aliyun credentials to change the VPC router's routing tables.
+Next, follow parts of [this document](https://coreos.com/flannel/docs/latest/alicloud-vpc-backend.html), which curiously enough talks about how to run flannel without talking at all about kubernetes. The key parts are that you need to create user accounts that flannel can use (ID and secret), and then flannel needs those Aliyun credentials to change the VPC router's routing tables.
 
-Create the credentials according to the document. Then, add the following under `spec.template.spec.containers` (if there's an existing `env:` section, use it):
+Strangely, the Aliyun flannel config doesn't have a placeholder for account credentials, but the document above tells us where they should go. Add the following under `spec.template.spec.containers` (if there's an existing `env:` section, use it):
 
 ```
         env:
@@ -275,12 +279,3 @@ There are two gaping holes in this guide:
 
 - This is a single-master Kubernetes cluster. That's not _terrible_... a master going down just means that new workloads can't be scheduled, not that existing ones break. This might be the right tradeoff for you. However, if you lose the master's disk, etcd configuration goes with it, and the cluster must be rebuilt from scratch. It must be periodically backed up.
 - Upgrading isn't addressed at all. This is something that kops does extremely well. Doing it manually on a cluster of modest size shouldn't be terrible -- drain a node, upgrade its components, re-add it to the cluster -- but there's a lot of potential for things to go wrong.
-
-
-
-## 11. Odds and Ends
-
-
-### Local Storage and Load Balancers
-
-I haven't yet tried to integrate any sort of Aliyun persistent volume storage driver. Instead, [local persistent volumes](https://kubernetes.io/blog/2018/04/13/local-persistent-volumes-beta/), which are in beta in k8s 1.10, seem like a viable option.
