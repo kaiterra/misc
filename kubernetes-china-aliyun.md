@@ -34,29 +34,29 @@ Docker Community Edition releases technically only have 4 months of support, and
 Here's a summary of the [official installation instructions](https://docker.github.io/engine/installation/linux/ubuntu/#install-using-the-repository):
 
 ```bash
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
 
 # TODO: Call sudo apt-key fingerprint.  Get this from the official instructions;
 # this is the kind of thing for which you shouldn't trust a third-party site.
  
 # Add the stable repository
-sudo add-apt-repository \
+add-apt-repository \
    "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
    $(lsb_release -cs) \
    stable"
-sudo apt update
+apt update
 
 # Find out what versions there are
 apt-cache madison docker-ce
 
 # Pick a version
-sudo apt install docker-ce=18.03.1~ce-0~ubuntu-xenial
+apt install docker-ce=18.03.1~ce-0~ubuntu-xenial
 ```
 
 **Important:** Configure log rotation so logs don't fill up your hard disk:
 
 ```bash
-sudo tee /etc/docker/daemon.json <<"EOF"
+tee /etc/docker/daemon.json <<"EOF"
 {
   "log-driver": "json-file",
   "log-opts": {
@@ -91,7 +91,7 @@ The [official instructions](https://kubernetes.io/docs/tasks/tools/install-kubea
 ```bash
 apt update && apt install -y apt-transport-https
 curl -s https://mirrors.aliyun.com/kubernetes/apt/doc/apt-key.gpg | apt-key add -
-cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
+tee /etc/apt/sources.list.d/kubernetes.list <<EOF
 deb https://mirrors.aliyun.com/kubernetes/apt/ kubernetes-xenial main
 EOF
 apt update
@@ -108,11 +108,22 @@ apt-cache madison kubelet
 apt install kubelet=1.10.3-00   # this depends on the k8s version you want to install
 ```
 
+## 5. Install Kubeadm
+
+
+You should use at least 1.11.0-00 because `kubeadm config print-default` and the imageRepository mirroring functionality depends on that.
+
+```bash
+# Ensure >= 1.11.0-00 is available
+apt-cache madison kubeadm
+
+apt install kubeadm
+```
 
 
 ### Customizing kubelet
 
-Add a line like this to the .conf file under `/etc/systemd/system/kubelet.service.d` in the kubeadm .conf file:
+Kubeadm creates the `/etc/systemd/system/kubelet.service.d` directory so it can configure kubelet.  Find the .conf file there, and add a line like this to it:
 
 ```
 Environment="KUBELET_CUSTOM_ARGS=--pod-infra-container-image=registry.cn-hangzhou.aliyuncs.com/google_containers/pause-amd64:3.1 --cgroup-driver=cgroupfs --allow-privileged=true"
@@ -120,7 +131,7 @@ Environment="KUBELET_CUSTOM_ARGS=--pod-infra-container-image=registry.cn-hangzho
 
 And then add `$KUBELET_CUSTOM_ARGS` to the end of the `ExecStart` command.
 
-> If for some reason this file doesn't exist, get the appropriate one from [github](https://github.com/kubernetes/kubernetes/tree/b930d7f9153f1c74a8927de3f061a448c2a5a98c/build/debs). The one for kubelet <1.11 is much fatter and has settings like `$KUBELET_NETWORK_ARGS`.
+> If for some reason this file doesn't exist, make sure you've already installed kubeadm.  Otherwise, get the appropriate one from [github](https://github.com/kubernetes/kubernetes/tree/b930d7f9153f1c74a8927de3f061a448c2a5a98c/build/debs). The one for kubelet <1.11 is much fatter and has settings like `$KUBELET_NETWORK_ARGS`.
 
 Here's what's going on here:
 
@@ -133,20 +144,6 @@ Here's what's going on here:
 Then, do `systemctl daemon-reload && systemctl restart kubelet`. It'll get stuck in a restart crash loop, but that's by design -- it'll start working properly once `kubeadm init` generates kubelet's configuration.
 
 > Given [this Github issue](https://github.com/kubernetes/kubeadm/issues/28), it seems like such manual configuration of kubelet shouldn't be necessary anymore, but perhaps that issue is referring to something else.
-
-
-
-## 5. Install Kubeadm
-
-
-You should use at least 1.11.0-00 because `kubeadm config print-default` and the imageRepository mirroring functionality depends on that.
-
-```bash
-# Ensure >= 1.11.0-00 is available
-apt-cache madison kubeadm
-
-apt install kubeadm
-```
 
 
 
