@@ -4,7 +4,11 @@ To allow kubernetes to automatically manage your networking, storage and other r
 
 Here, we'll assume you create one account with all the necessary permissions.
 
-To control VPC networking, just add the `AliyunVPCFullAccess` policy.
+### Networking
+
+To allow flannel, the networking plugin we're going to install, to change the VPC router's routing tables, add the `AliyunVPCFullAccess` policy.
+
+### Storage
 
 To use the disk attach functionality, you'll need to add a policy that looks like this:
 
@@ -55,7 +59,7 @@ To allow OSS buckets to be mounted as disks, use this policy:
 
 Consider removing DeleteObject if you're only using this for backup and restore.  Instead, set a retention policy on OSS buckets.
 
-## Create secrets
+### Create secrets
 
 To allow services to use your account credentials, create an .env file (don't check it into git!) and use kubectl to create the secret:
 

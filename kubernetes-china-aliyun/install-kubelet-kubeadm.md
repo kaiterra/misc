@@ -47,7 +47,7 @@ Again, gcr.io is _persona non grata_ in China. So, first tell kubeadm that when 
 # It's best if you run this command on the machine you're setting up the cluster on.
 # If you keep getting TLS timeouts, then run it somewhere else, and change:
 #  - the two places where your machine's hostname appears
-#  - advertiseAddress to your machine's non-public IP
+#  - advertiseAddress to "0.0.0.0", or whatever interface you want the API to be accessible on
 #
 # And yes, you need to start from a full config file.  Just specifying the
 # settings you want to override doesn't seem to work.
