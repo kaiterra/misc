@@ -25,6 +25,7 @@ To setup a new master, follow these steps:
 4. [Install kubelet and kubeadm](install-kubelet-kubeadm.md)
 5. [Configure kubelet and kubeadm for use with a cluster](customize-cluster.md)
 6. [Run `kubeadm init`](kubeadm-init.md)
+7. [Prepare for cloud integration](prepare-cloud-integration.md)
 7. [Networking](networking.md)
 
 

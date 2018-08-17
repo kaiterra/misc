@@ -10,6 +10,16 @@ There are a few more kubeadm.conf changes to make, in addition to the ones you'v
 sed -i "s/  podSubnet: .*/  podSubnet: \"10.24.0.0\/16\"/g" kubeadm.conf
 ```
 
+The self-signed x509 certs that kubeadm generates won't work with an Aliyun machine in a VPC. That's because the public IP isn't actually one of the network interfaces available to the machine, so when kubeadm is detecting all the interfaces it needs to add to the cert's alternate names, the public IP won't be one of them.
+
+So, you also need to add any names you'll use to connect to the cluster in the kubeadm.conf file. This includes any public DNS names you'll want to use to connect to your cluster. Add these under the `kind: MasterConfiguration` section:
+
+```yaml 
+apiServerCertSANs:
+- [[WHATEVER-DNS-NAME]]
+- [[AND-MAYBE-THE-PUBLIC-IP-IF-YOU-WANT]]
+```
+
 
 ## kubelet configuration
 

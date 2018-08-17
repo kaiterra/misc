@@ -28,7 +28,7 @@ apt-cache madison docker-ce
 apt install docker-ce=18.03.1~ce-0~ubuntu-xenial
 ```
 
-**Important:** Configure log rotation so logs don't fill up your hard disk:
+**Important:** Configure log rotation so logs don't fill up your hard disk, and enable the Docker China mirror:
 
 ```bash
 tee /etc/docker/daemon.json <<"EOF"
@@ -37,7 +37,8 @@ tee /etc/docker/daemon.json <<"EOF"
   "log-opts": {
     "max-size": "10m",
     "max-file": "5"
-  }
+  },
+  "registry-mirrors": ["https://registry.docker-cn.com"]
 }
 EOF
 
