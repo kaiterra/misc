@@ -43,3 +43,18 @@ apt remove kubelet
 ```
 
 In general, if things don't seem to be working, use `kubectl get pod --all-namespaces` and see if any pods aren't showing `READY 1/1`. Use a combination of `kubectl describe pod -n kube-system <pod>`, looking at logs, and google to try to diagnose and solve the problem.
+
+
+#### kubelet configuration
+
+Ensure the file `/etc/systemd/system/kubelet.service.d/10-kubeadm.conf` exists and contains a line like this:
+
+```
+EnvironmentFile=-/var/lib/kubelet/kubeadm-flags.env
+```
+
+If not, get the appropriate one from [github](https://github.com/kubernetes/kubernetes/tree/b930d7f9153f1c74a8927de3f061a448c2a5a98c/build/debs), then:
+
+```bash
+systemctl daemon-reload && systemctl restart kubelet
+```

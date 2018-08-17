@@ -44,7 +44,7 @@ To allow OSS buckets to be mounted as disks, use this policy:
         "oss:ListObjects",
         "oss:GetObject",
         "oss:PutObject",
-		"oss:DeleteObject",
+        "oss:DeleteObject",
         "oss:PutObjectAcl",
         "oss:GetObjectAcl"
       ],
@@ -57,7 +57,7 @@ To allow OSS buckets to be mounted as disks, use this policy:
 }
 ```
 
-Consider removing DeleteObject if you're only using this for backup and restore.  Instead, set a retention policy on OSS buckets.
+Consider removing DeleteObject if you're only using this for backup and restore.  Instead, set a retention policy on OSS buckets to clean up old files.
 
 ### Create secrets
 
@@ -65,8 +65,8 @@ To allow services to use your account credentials, create an .env file (don't ch
 
 ```bash
 tee k8s-aliyun.env <<"EOF"
-ACCESS_KEY_ID=YourAccessKeyID
-ACCESS_KEY_SECRET=YourAccessKeySecret
+ACCESS_KEY_ID=XXXXYourAccessKeyID
+ACCESS_KEY_SECRET=XXXXYourAccessKeySecret
 EOF
 
 @kubectl -n kube-system create secret generic k8s-aliyun \

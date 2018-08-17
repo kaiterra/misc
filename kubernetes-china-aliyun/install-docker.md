@@ -43,5 +43,5 @@ tee /etc/docker/daemon.json <<"EOF"
 }
 EOF
 
-sudo systemctl daemon-reload && sudo systemctl restart docker
+systemctl daemon-reload && systemctl restart docker
 ```
