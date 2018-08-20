@@ -26,7 +26,7 @@ apt update
 apt-cache madison docker-ce
 
 # Pick a version
-apt install docker-ce=18.03.1~ce-0~ubuntu-xenial
+apt install docker-ce=17.03.2~ce-0~ubuntu-xenial
 ```
 
 **Important:** Configure log rotation so logs don't fill up your hard disk, and enable the Docker China mirror:
