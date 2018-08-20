@@ -42,7 +42,7 @@ apt install kubeadm
 ```
 
 
-## Get initial kubeadm config
+## Get initial kubeadm config (master or single node ONLY)
 
 Again, gcr.io is _persona non grata_ in China. So, first tell kubeadm that when it's starting up the Kuberentes components, it should get images from Aliyun's mirror. This and other settings are below:
 
