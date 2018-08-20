@@ -35,8 +35,6 @@ Conveniently, `kubeadm.conf` has some hooks that can change kubelet's configurat
     # **WARNING**: this will be removed in Kubernetes v1.12.  There's a replacement, but I couldn't
     # figure out what it was after 5 minutes of googling.
     allow-privileged: "true"
-    # Yet another place where it's necessary to set the hostname
-    hostname-override: [[YOUR-HOSTNAME]]
     # Needed for the storage driver
     enable-controller-attach-detach: "false"
 ```
