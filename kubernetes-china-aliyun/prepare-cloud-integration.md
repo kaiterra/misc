@@ -57,7 +57,7 @@ To allow OSS buckets to be mounted as disks, use this policy:
 }
 ```
 
-Consider removing DeleteObject if you're only using this for backup and restore.  Instead, set a retention policy on OSS buckets to clean up old files.
+Consider removing `DeleteObject` if you're only using this for backup and restore.  Instead, set a retention policy on OSS buckets to clean up old files.
 
 ### Create secrets
 

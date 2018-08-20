@@ -1,12 +1,13 @@
 # Kubernetes in China
 
-Thanks to Aliyun mirrors for both OS packages and docker images, in spring/summer 2018 this got a lot easier.
+This guide uses kubeadm to set up Kubernetes in China, either as a cluster in Aliyun or on your local machine. Thanks to Aliyun mirrors for both OS packages and docker images, in spring/summer 2018 this got a lot easier.
 
-This guide uses kubeadm to set up Kubernetes in China, either as a cluster in Aliyun or on your local machine. Details:
+Details:
 
-- Ubuntu 16.04
+- Ubuntu 16.04.  Any [supported](https://success.docker.com/article/compatibility-matrix) Docker OS should work, though CoreOS is apparently the new hotness when it comes to hosting containerized workloads.
 - Single master (non-HA). Should be straightforward to adapt to HA though.
 - Integration with VPC networking and storage
+- Uses `docker-ce` as a container runtime.  Theoretically, kubernetes can work with any supported container runtime. For example, rkt should also work. However, Docker remains the most widely used so that's what we'll use here.
 
 Not covered:
 
@@ -16,6 +17,8 @@ Not covered:
 
 
 ## Aliyun Cluster (master)
+
+First, make sure all nodes are in the same VPC (专有网络).  The CIDR address block used for the VPC's network (目标网段; often something like 172.17.0.0/16 or so) doesn't seem to be important; it doesn't appear in the manual configuration anywhere.
 
 To setup a new master, follow these steps:
 

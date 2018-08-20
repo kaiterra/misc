@@ -1,7 +1,5 @@
 # k8s China - Install Docker
 
-> Theoretically, kubernetes can work with any supported container runtime. For example, rkt should also work. However, Docker remains the most widely used so that's what we'll use here.
-
 17.03 is the [latest supported version](https://kubernetes.io/docs/setup/independent/install-kubeadm/#installing-docker) with kubeadm right now, but as of 2018-07-12 Aliyun's own K8s service was using 17.06.
 
 Docker Community Edition releases technically only have 4 months of support, and at some point they'll age out of the Ubuntu repos entirely, so choose wisely.
