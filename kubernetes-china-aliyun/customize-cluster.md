@@ -1,8 +1,6 @@
-# k8s China - Configure kubelet and kubeadm for use with a cluster
+# k8s China - kubeadm.conf cluster configuration
 
-## kubeadm.conf
-
-There are a few more kubeadm.conf changes to make, in addition to the ones you've already made.
+To configure a k8s master for an Aliyun cluster, use these steps.
 
 ### podSubnet
 
