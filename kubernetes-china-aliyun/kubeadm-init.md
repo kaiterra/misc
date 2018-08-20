@@ -34,12 +34,10 @@ kubectl taint nodes --all node-role.kubernetes.io/master-
 
 If `kubeadm init` fails early on due to an error "port is already in use", that's likely because a previous `kubeadm init` attempt wasn't properly cleaned up. Run `kubeadm reset` and try again.
 
-To completely reset the cluster and start over, do this:
+If you've done that, you can also try re-running kubeadm without first doing a reset:
 
 ```bash
-kubeadm reset
-rm -rf /etc/systemd/system/kubelet.service.d
-apt remove kubelet
+kubeadm init --config kubeadm.conf --ignore-preflight-errors=all
 ```
 
 In general, if things don't seem to be working, use `kubectl get pod --all-namespaces` and see if any pods aren't showing `READY 1/1`. Use a combination of `kubectl describe pod -n kube-system <pod>`, looking at logs, and google to try to diagnose and solve the problem.
