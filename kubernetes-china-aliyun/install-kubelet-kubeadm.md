@@ -5,11 +5,14 @@
 The [official instructions](https://kubernetes.io/docs/tasks/tools/install-kubeadm) tell you to add the packages.cloud.google.com repo, but that's obviously not going to work. Luckily, Aliyun has a mirror:
 
 ```bash
-apt update && apt install -y apt-transport-https
+apt install -y apt-transport-https
+
 curl -s https://mirrors.aliyun.com/kubernetes/apt/doc/apt-key.gpg | apt-key add -
+
 tee /etc/apt/sources.list.d/kubernetes.list <<EOF
 deb https://mirrors.aliyun.com/kubernetes/apt/ kubernetes-xenial main
 EOF
+
 apt update
 ```
 
@@ -46,12 +49,14 @@ Again, gcr.io is _persona non grata_ in China. So, first tell kubeadm that when 
 ```bash
 # It's best if you run this command on the machine you're setting up the cluster on.
 # If you keep getting TLS timeouts, then run it somewhere else, and change:
-#  - the two places where your machine's hostname appears
 #  - advertiseAddress to "0.0.0.0", or whatever interface you want the API to be accessible on
 #
 # And yes, you need to start from a full config file.  Just specifying the
 # settings you want to override doesn't seem to work.
 kubeadm config print-default > kubeadm.conf
+
+# Use machine's hostname for the node name
+sed -i -e "s/  name: /  #name: /g" kubeadm.conf
 
 # Use the gcr.io mirror
 sed -i "s/imageRepository: .*/imageRepository: registry.cn-hangzhou.aliyuncs.com\/google_containers/g" kubeadm.conf
