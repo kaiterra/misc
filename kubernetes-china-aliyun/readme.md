@@ -29,7 +29,8 @@ To setup a new master, follow these steps:
 5. [Configure kubelet and kubeadm for use with a cluster](customize-cluster.md)
 6. [Run `kubeadm init`](kubeadm-init.md)
 7. [Prepare for cloud integration](prepare-cloud-integration.md)
-7. [Networking](networking.md)
+8. [Networking](networking.md)
+9. [Storage](storage.md)
 
 
 ## Aliyun Cluster (workers)

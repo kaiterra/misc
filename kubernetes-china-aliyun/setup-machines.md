@@ -1,8 +1,10 @@
 # k8s China - Setup Machines
 
-The storage driver used in this guide requires the node name to be of the form `regionId.instanceId`; for example: `cn-hangzhou.i-bp12gei4ljuzilgwzahc`.  While this is inconvenient, if you know about it while you're still setting up your cluster, not much extra work is required.
+The storage driver used in this guide requires the node name to be of the form `regionId.instanceId`, for example: `cn-hangzhou.i-bp12gei4ljuzilgwzahc`.  While this is inconvenient, if you know about it while you're still setting up your cluster, not much extra work is required.
 
-Aliyun automatically sets the machine's hostname to something like its instance ID (`i-[a-z0-9]+`), replacing the dash after the 'i' with the character 'Z', and sometimes adding a final 'Z'.  This doesn't make any sense so we'll fix it.
+> Normally, kubeadm uses the machine's host name (likely the output of something like `$(hostname)`) as the node name. There are ways to override this, but they increase complexity.  The downside is that hostnames with dots in them are generally [a terrible idea](https://serverfault.com/questions/229331/can-i-have-dots-in-a-hostname) unless it's the machine's addressable FQDN. And in this case, the storage driver requires the region to come FIRST, which is the opposite of how DNS works. Future updates to this guide could detail how to change the hostname back to something sane after adding the node to the cluster.
+
+Aliyun automatically sets the machine's hostname to something like its instance ID (`i-[a-z0-9]+`), replacing the dash after the 'i' with the character 'Z', and sometimes adding a final 'Z'.  This doesn't make any sense so we'll change it.
 
 Changes made with `hostnamectl` don't always stick after a reboot, so to be safe we'll edit `/etc/hostname` directly:
 
