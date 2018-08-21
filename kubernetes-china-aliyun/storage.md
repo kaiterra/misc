@@ -68,11 +68,11 @@ spec:
           requests:
             cpu: 100m
             memory: 200Mi
-		volumeMounts:
-		# flexVolume plugins must be installed to the host OS of every node in the
-		# cluster. This plugin uses the common trick of being deployed as a DaemonSet
-		# so that it's automatically installed whenever a new node joins the cluster.
-		# This requires that /etc and /usr be mounted into the container.
+        volumeMounts:
+        # flexVolume plugins must be installed to the host OS of every node in the
+        # cluster. This plugin uses the common trick of being deployed as a DaemonSet
+        # so that it's automatically installed whenever a new node joins the cluster.
+        # This requires that /etc and /usr be mounted into the container.
         - name: usrdir
           mountPath: /host/usr/
         - name: etcdir
@@ -96,7 +96,10 @@ spec:
 
 Storage classes, labels, etc. aren't strictly necessary.  You can even skip creating PersistentVolumes entirely and just use the Volume field of a StatefulSet (or even Deployment).  However, that won't get you very far because it doesn't allow you to create StatefulSets with more than one replica -- there's no way to address all the individual disks involved.
 
-So, to allow a database like PostgreSQL to run as a StatefulSet, you'll need to declare a storage class and a volume, like this:
+So, to allow a database like PostgreSQL to run as a StatefulSet, you'll need to declare a StorageClass and a PersistentVolume, as below.  We're abusing k8s here in a couple ways:
+
+- To account for the fact that a PersistentVolume may be resized, and to avoid having to duplicate its size in mulitple places, my convention is to set all storage to 1Gi, and use StorageClassName to select which PersistentVolumes to use with a particular service.
+- StorageClasses are generally for dynamic provisioning, so we're abusing them here.  The provisioner, no-provisioning, is simply a dummy label to remind k8s that it shouldn't expect to be able to automatically provision volumes unless it knows about a plugin called "no-provisioning", which obviously doesn't exist.
 
 ```yaml
 kind: StorageClass
@@ -168,7 +171,7 @@ Throughout all this, the StatefulSet's PVCs will remain bound to their Persisten
 
 #### Resize the file system
 
-Once the container is up and running, then locate the block device from which the filesystem was mounted, and run:
+Once the container is up and running, locate the block device from which the filesystem was mounted, and run:
 
 ```bash
 resize2fs /dev/vdb
