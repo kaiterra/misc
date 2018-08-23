@@ -8,7 +8,7 @@ Alpine is [notorious](https://www.google.com/search?q=alpine+resolv.conf+options
 
 > If you don't perform these steps, the symptom will be that the flannel container will fail to start, and logs will show DNS resolution failures.
 
-To sidestep all of these, you'll need to make sure the options inside `/etc/resolv.conf` are compatible with Alpine and golang.  `resolv.conf` is generated, so instead modify `/etc/resolvconf/resolv.conf.d/tail`, and if it contains an `options` line, remove all of them except `rotate`:
+As a workaround, you'll need to make sure the options inside `/etc/resolv.conf` are compatible with Alpine and golang.  `resolv.conf` is a generated file, so instead modify `/etc/resolvconf/resolv.conf.d/tail`, and if it contains an `options` line, remove all of them except `rotate`:
 
 ```
 # disable options that are incompatible with alpine linux
