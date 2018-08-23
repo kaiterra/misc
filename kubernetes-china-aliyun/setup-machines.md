@@ -18,7 +18,7 @@ options rotate
 
 ### Opening up the security group
 
-By default, VPCs only allow traffic from other nodes on the interface that falls within the VPC's subnet (the one starting with `172.16.0.0/20`).  However, flannel will be creating VPC routes and forwarding traffic in the pod's subnet, which by default is `10.244.0.0/16`.  So, this trafic will be dropped by the cloud-provided firewall.
+By default, VPCs only allow traffic from other nodes on the interface that falls within the VPC's subnet (the one that looks like `172.xx.0.0/16`).  However, flannel will be creating VPC routes and forwarding traffic in the pod's subnet, which by default is `10.244.0.0/16`.  So, this trafic will be dropped by the cloud-provided firewall.
 
 Assuming you have a security group (安全组) that covers all the nodes in your cluster, add an exception to allow all traffic from any node with this address.  In chinese, the options will look like this:
 
