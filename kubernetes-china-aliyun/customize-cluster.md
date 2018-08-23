@@ -2,14 +2,6 @@
 
 To configure a k8s master for an Aliyun cluster, use these steps.
 
-### podSubnet
-
-`podSubnet` is necessary to play nice with the kube-flannel-aliyun.yaml config from the networking setup later on.  This must match.
-
-```bash
-sed -i "s/  podSubnet: .*/  podSubnet: \"10.24.0.0\/16\"/g" kubeadm.conf
-```
-
 ### Certificate domain names
 
 The self-signed x509 certs that kubeadm generates won't work with an Aliyun machine in a VPC. That's because the public IP isn't actually one of the network interfaces available to the machine, so when kubeadm is detecting all the interfaces it needs to add to the cert's alternate names, the public IP won't be one of them.
