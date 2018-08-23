@@ -13,6 +13,7 @@ apiServerCertSANs:
 - [[WHATEVER-DNS-NAME]]
 - [[AND-MAYBE-THE-PUBLIC-IP-IF-YOU-WANT]]
 ```
+
 Conveniently, `kubeadm.conf` has some hooks that can change kubelet's configuration.  Under the `kind: MasterConfiguration` section, under `nodeRegistration:`, add this block of yaml:
 
 ### kubelet config

@@ -91,6 +91,7 @@ spec:
           path: /var/log/alicloud/
 ```
 
+**WARNING**: As of August 2018, there's an issue where this flexVolume plugin is sometimes initialized from inside the `kube-controller-manager` container. This fails because it tries to write to `/var/log/alicloud`, which doesn't exist.  If this is blocking you, a code change is required to fix this, and it's available in [our fork](https://github.com/kaiterra/flexvolume).
 
 ### Using the plugin
 
@@ -99,7 +100,7 @@ Storage classes, labels, etc. aren't strictly necessary.  You can even skip crea
 So, to allow a database like PostgreSQL to run as a StatefulSet, you'll need to declare a StorageClass and a PersistentVolume, as below.  We're abusing k8s here in a couple ways:
 
 - To account for the fact that a PersistentVolume may be resized, and to avoid having to duplicate its size in mulitple places, my convention is to set all storage to 1Gi, and use StorageClassName to select which PersistentVolumes to use with a particular service.
-- StorageClasses are generally for dynamic provisioning, so we're abusing them here.  The provisioner, no-provisioning, is simply a dummy label to remind k8s that it shouldn't expect to be able to automatically provision volumes unless it knows about a plugin called "no-provisioning", which obviously doesn't exist.
+- StorageClasses are generally for dynamic provisioning, so we're abusing them here.  The provisioner, `no-provisioning`, is simply a dummy label to remind k8s that it shouldn't expect to be able to automatically provision volumes unless it knows about a plugin called "no-provisioning", which obviously doesn't exist.
 
 ```yaml
 kind: StorageClass
@@ -135,7 +136,7 @@ spec:
 
 ```
 
-Then, in the StatefulSet, you'll create a ClaimTemplate as you would in any other cloud provider that supports dynamic provisioning:
+Then, in the StatefulSet, you'll set up `volumeClaimTemplates` as you would in any other cloud provider that supports dynamic provisioning:
 
 ```yaml
   volumeClaimTemplates:
@@ -151,7 +152,7 @@ Then, in the StatefulSet, you'll create a ClaimTemplate as you would in any othe
 
 ## Disk Resizing
 
-Auto-resizing is an alpha feature in 1.11, but flexVolumes aren't supported (not that our flexVolume driver would suport it anyway), so we're out of luck there.  Luckily, however, manual resizing isn't hard.
+Auto-resizing is an alpha feature in kubernetes 1.11, but flexVolumes aren't supported (not that our flexVolume driver would support it anyway), so we're out of luck there.  Luckily, however, manual resizing isn't hard.
 
 Basically, the steps are:
 
@@ -161,7 +162,7 @@ Basically, the steps are:
 
 #### Resize the volume
 
-Normally this is done in the Aliyun console. The resize will complete, but the OS won't recognize it until the disk is detached and re-attached.
+This can be done in the Aliyun console. The resize will succeed, but the OS won't recognize it until the disk is detached and re-attached.
 
 #### Restart the service
 

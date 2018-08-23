@@ -43,4 +43,3 @@ Now, apply that file using `kubectl apply -f kube-flannel.yml`. Wait for a while
 Finally, go into your Aliyun control panel and look at the route table details for the VPC (look the VPC's Routing Tables/路由表, and then click Manage/管理 on the default one). If everything worked, you should see an entry for your master node under subnet 10.244.0.0/24.
 
 Further reading: [this doc](https://www.alibabacloud.com/help/doc-detail/64530.htm?spm=a2c63.p38356.b99.82.71a356aa6GlXQ1), which talks about the different subnets involved when using a VPC.
-

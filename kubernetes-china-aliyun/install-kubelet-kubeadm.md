@@ -58,11 +58,13 @@ kubeadm config print-default > kubeadm.conf
 # Use machine's hostname for the node name
 sed -i -e "s/  name: /  #name: /g" kubeadm.conf
 
-# Use the gcr.io mirror
+# Use the Aliyun container mirror
 sed -i "s/imageRepository: .*/imageRepository: registry.cn-hangzhou.aliyuncs.com\/google_containers/g" kubeadm.conf
 
 # This is your chosen Kubernetes version
 sed -i "s/kubernetesVersion: .*/kubernetesVersion: v1.10.3/g" kubeadm.conf
-```
 
-Note: flannel config may require you to explicitly set podSubnet; see [this github issue](https://github.com/kubernetes/kubernetes/issues/36575#issuecomment-262639535) for details.
+# podSubnet is necessary to play nice with flannel networking setup later on; see
+# https://github.com/kubernetes/kubernetes/issues/36575#issuecomment-262639535
+sed -i "s/  podSubnet: .*/  podSubnet: \"10.244.0.0\/16\"/g" kubeadm.conf
+```
