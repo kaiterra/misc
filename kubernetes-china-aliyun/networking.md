@@ -38,7 +38,7 @@ spec:
             name: k8s-aliyun
 ```
 
-Now, apply that file using `kubectl apply -f kube-flannel.yaml`. Wait for a while, and you might need to restart kubelet once (`systemctl restart kubelet`) to make sure everything comes up correctly.
+Now, apply that file using `kubectl apply -f kube-flannel.yml`. Wait for a while, and you might need to restart kubelet once (`systemctl restart kubelet`) to make sure everything comes up correctly.
 
 Finally, go into your Aliyun control panel and look at the route table details for the VPC (look the VPC's Routing Tables/路由表, and then click Manage/管理 on the default one). If everything worked, you should see an entry for your master node under subnet 10.244.0.0/24.
 
