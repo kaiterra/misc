@@ -64,3 +64,5 @@ sed -i "s/imageRepository: .*/imageRepository: registry.cn-hangzhou.aliyuncs.com
 # This is your chosen Kubernetes version
 sed -i "s/kubernetesVersion: .*/kubernetesVersion: v1.10.3/g" kubeadm.conf
 ```
+
+Note: flannel config may require you to explicitly set podSubnet; see [this github issue](https://github.com/kubernetes/kubernetes/issues/36575#issuecomment-262639535) for details.
