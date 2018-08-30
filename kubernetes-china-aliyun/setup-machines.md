@@ -16,6 +16,8 @@ As a workaround, you'll need to make sure the options inside `/etc/resolv.conf` 
 options rotate
 ```
 
+**TODO:**: Aliyun **helpfully :) :)** overwrites `/etc/resolvconf/resolv.conf.d/tail` whenever the machine restarts.  Even more **helpfully**, Aliyun puts the DNS servers directly in the `tail` file itself, which defeats the purpose of resolvconf entirely.  I haven't yet figured out the magic place in the startup order to override this.
+
 ### Opening up the security group
 
 By default, VPCs only allow traffic from other nodes on the interface that falls within the VPC's subnet (the one that looks like `172.xx.0.0/16`).  However, flannel will be creating VPC routes and forwarding traffic in the pod's subnet, which by default is `10.244.0.0/16`.  So, this trafic will be dropped by the cloud-provided firewall.
