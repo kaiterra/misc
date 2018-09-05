@@ -6,6 +6,8 @@ On the master, get the join token:
 kubeadm token create --print-join-command
 ```
 
+> Note: this command requires ~/.kube/config to be a valid kubectl configuration that points to the current cluster.  If it's not (perhaps from a previous build of the cluster), you'll need to copy it from `/etc/kubernetes/admin.conf`.
+
 Obviously, copy the command over to the new node and run it.  If successful, you'll see some text liks this:
 
 ```
