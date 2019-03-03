@@ -27,6 +27,9 @@ apt-cache madison kubelet
 
 # Pick one, then:
 apt install kubelet=1.10.3-00   # this depends on the k8s version you want to install
+
+# Never upgrade manually, since that will probably break your cluster
+apt-mark hold kubelet
 ```
 
 
