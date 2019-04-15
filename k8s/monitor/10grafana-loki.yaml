@@ -1,0 +1,153 @@
+kind: ConfigMap
+metadata:
+  name: loki-config
+  namespace: monitor
+apiVersion: v1
+data:
+  loki.yaml: |-
+    # Example: https://github.com/grafana/loki/blob/master/cmd/loki/loki-local-config.yaml
+    auth_enabled: false
+
+    server:
+      http_listen_port: 3100
+
+    limits_config:
+      enforce_metric_name: false
+
+    ingester:
+      lifecycler:
+        address: 127.0.0.1
+        ring:
+          store: inmemory
+          replication_factor: 1
+      chunk_idle_period: 15m
+
+    schema_config:
+      configs:
+      - from: 0
+        store: boltdb
+        object_store: filesystem
+        schema: v9
+        index:
+          prefix: index_
+          period: 168h
+
+    storage_config:
+      boltdb:
+        directory: /data/loki/index
+      filesystem:
+        directory: /data/loki/chunks
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: monitor
+spec:
+  ports:
+  - port: 3000
+  selector:
+    app: grafana
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: loki
+  namespace: monitor
+spec:
+  ports:
+  - port: 3100
+    name: ingest
+  selector:
+    app: grafana
+
+---
+
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: grafana
+  namespace: monitor
+spec:
+  serviceName: grafana
+  replicas: 1
+
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      initContainers:
+      # So lame that we need this init container
+      - name: init-grafana
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        command: ["mkdir", "-p", "/data/grafana/data", "/data/grafana/logs"]
+        volumeMounts:
+        - mountPath: /data
+          name: data
+
+      containers:
+      - name: grafana
+        image: grafana/grafana:6.0.2
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3000
+        readinessProbe:
+          tcpSocket:
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        volumeMounts:
+        - mountPath: /data
+          name: data
+        env:
+        - name: GF_PATHS_DATA
+          value: /data/grafana/data
+        - name: GF_PATHS_LOGS
+          value: /data/grafana/logs
+        - name: GF_PATHS_PLUGINS
+          value: /data/grafana/plugins
+        - name: GF_SERVER_HTTP_PORT
+          value: "3000"
+        resources:
+          requests:
+            cpu: 0
+            memory: 300Mi
+
+      - name: loki
+        image: grafana/loki:master-c994823
+        imagePullPolicy: IfNotPresent
+        args:
+        - "-config.file=/etc/loki/loki.yaml"
+        # - -log.level=debug
+        ports:
+        - containerPort: 3100
+        readinessProbe:
+          tcpSocket:
+            port: 3100
+          initialDelaySeconds: 5
+        volumeMounts:
+        - name: loki-config
+          mountPath: /etc/loki
+        - name: data
+          mountPath: /data
+
+      volumes:
+      - name: loki-config
+        configMap:
+          name: loki-config
+
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      storageClassName: monitor-db
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi

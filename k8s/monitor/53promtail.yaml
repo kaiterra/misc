@@ -1,0 +1,75 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: promtail
+  namespace: monitor
+  labels:
+    name: promtail
+spec:
+  # updateStrategy:
+  #   type: RollingUpdate
+  # replicas: 1
+  template:
+    metadata:
+      labels:
+        name: promtail
+    spec:
+      serviceAccount: promtail-serviceaccount
+      serviceAccountName: promtail-serviceaccount
+      tolerations:
+      - key: "node-role.kubernetes.io/master"
+        operator: "Exists"
+        effect: "NoSchedule"
+      containers:
+      - name: promtail
+        image: grafana/promtail:master-c994823
+        args:
+        - -config.file=/etc/promtail/promtail.yaml
+        - -client.url=http://loki.monitor:3100/api/prom/push
+        # - -log.level=debug
+        env:
+        # promtail will discard any logs from pods whose node name doesn't match $HOSTNAME
+        # in the environment.  By default $HOSTNAME is the promtail pod's name, so
+        # we override it with the current node's name
+        - name: HOSTNAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        volumeMounts:
+        - name: config
+          mountPath: /etc/promtail
+        - name: run
+          mountPath: /run/promtail
+        - name: pods
+          mountPath: /var/log/pods
+          readOnly: true
+        - name: docker
+          mountPath: /var/lib/docker/containers
+          readOnly: true
+
+        # resources: {}
+        #  limits:
+        #    cpu: 200m
+        #    memory: 128Mi
+        #  requests:
+        #    cpu: 100m
+        #    memory: 128Mi
+
+        securityContext:
+          # readOnlyRootFilesystem: true
+          runAsGroup: 0
+          runAsUser: 0
+
+      volumes:
+      - name: config
+        configMap:
+          name: promtail-config
+      - name: run
+        hostPath:
+          path: /run/promtail
+      - name: pods
+        hostPath:
+          path: /var/log/pods
+      - name: docker
+        hostPath:
+          path: /var/lib/docker/containers
