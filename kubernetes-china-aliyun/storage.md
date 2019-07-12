@@ -168,7 +168,11 @@ This can be done in the Aliyun console. The resize will succeed, but the OS won'
 
 For StatefulSets, it's enough to schedule some sort of rolling update -- once all the containers in the pod have terminated, the disk will get detached; when the pod is restarted, the disk will be re-attached and the new size will appear.
 
+> Note that kubernetes may schedule the pod to run on a different node than it was before. If so, the disk will be attached to the new node where the pod is now running.
+
 Throughout all this, the StatefulSet's PVCs will remain bound to their PersistentVolumes.
+
+Verify that the volume has been detached and the newly resized volume is recognized by the machine using `lsblk`. If not, you'll need to troubleshoot why the volume was not detached.
 
 #### Resize the file system
 
@@ -178,4 +182,6 @@ Once the container is up and running, locate the block device from which the fil
 resize2fs /dev/vdb
 ```
 
-or whatever block device the volume is mounted from.  This performs an online resize of the file system.
+or whatever block device the volume is mounted from. This performs an online resize of the file system.
+
+Use `df -h` to verify that the new filesystem size is recognized by Linux.
