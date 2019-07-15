@@ -22,12 +22,13 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
 And now you should be able to run `kubectl cluster-info`.
 
-Finally, if you wish to permit master nodes to run workloads (this is a security vs. resource consumption tradeoff), use:
+Finally, if you wish to permit master nodes to run workloads, use:
 
 ```bash
 kubectl taint nodes --all node-role.kubernetes.io/master-
 ```
 
+Should you do this? If your master is oversized and cluster resources are scarce, consider it.  The danger is that it's possible for pods scheduled to the master node to overload it and bring it down.  This is bad enough if it happens on a normal node, but worse if it happens on the master node.
 
 
 ### Troubleshooting
